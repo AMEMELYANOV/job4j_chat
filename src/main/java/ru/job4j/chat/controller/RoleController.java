@@ -28,12 +28,9 @@ public class RoleController {
     @GetMapping("/{id}")
     public ResponseEntity<Role> findById(@PathVariable int id) {
         var role = this.roleService.findById(id);
-        return new ResponseEntity<Role>(
-                role.orElseThrow(
-                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                "Role is not found. Please, check id.")
-                ), HttpStatus.OK
-        );
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(role.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Role is not found. Please, check id.")));
     }
 
     @PostMapping("/")
@@ -41,10 +38,9 @@ public class RoleController {
         if (role.getName() == null) {
             throw new NullPointerException("Name mustn't be empty");
         }
-        return new ResponseEntity<Role>(
-                this.roleService.save(role),
-                HttpStatus.CREATED
-        );
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(this.roleService.save(role));
     }
 
     @PutMapping("/")
