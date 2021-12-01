@@ -3,7 +3,9 @@ package ru.job4j.chat.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.model.Message;
+import ru.job4j.chat.model.Role;
 import ru.job4j.chat.service.MessageService;
 
 import java.util.ArrayList;
@@ -27,13 +29,21 @@ public class MessageController {
     public ResponseEntity<Message> findById(@PathVariable int id) {
         var message = this.messageService.findById(id);
         return new ResponseEntity<Message>(
-                message.orElse(new Message()),
-                message.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
+                message.orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Message is not found. Please, check id.")
+                ), HttpStatus.OK
         );
     }
 
     @PostMapping("/")
     public ResponseEntity<Message> create(@RequestBody Message message) {
+        if (message.getContent() == null || message.getPerson() == null
+        || message.getPerson().getId() == 0 || message.getRoom() == null
+        || message.getRoom().getId() == 0) {
+            throw new NullPointerException("Content, Person, Person.id, "
+                    + "Room and Room.id mustn't be empty");
+        }
         return new ResponseEntity<Message>(
                 this.messageService.save(message),
                 HttpStatus.CREATED
@@ -42,6 +52,10 @@ public class MessageController {
 
     @PutMapping("/")
     public ResponseEntity<Void> update(@RequestBody Message message) {
+        if (message.getContent() == null || message.getPerson().getId() == 0
+                || message.getRoom().getId() == 0) {
+            throw new NullPointerException("Content, Person ID and Room ID mustn't be empty");
+        }
         this.messageService.save(message);
         return ResponseEntity.ok().build();
     }
