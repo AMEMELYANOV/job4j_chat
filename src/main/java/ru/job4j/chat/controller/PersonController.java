@@ -9,12 +9,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.model.Person;
-import ru.job4j.chat.model.Role;
 import ru.job4j.chat.service.PersonService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -106,5 +106,13 @@ public class PersonController {
         LOGGER.error(e.getLocalizedMessage());
     }
 
+    @PatchMapping("/")
+    public ResponseEntity<Person> patch(@RequestBody Person person)
+            throws InvocationTargetException, IllegalAccessException {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(personService.patchModel(person).
+                        orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Person is not found or invalid properties mapping")));
+    }
 }
 

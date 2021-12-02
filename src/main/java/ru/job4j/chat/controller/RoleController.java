@@ -5,9 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.model.Role;
-import ru.job4j.chat.model.Room;
 import ru.job4j.chat.service.RoleService;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,5 +58,14 @@ public class RoleController {
         role.setId(id);
         this.roleService.delete(role);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/")
+    public ResponseEntity<Role> patch(@RequestBody Role role)
+            throws InvocationTargetException, IllegalAccessException {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(roleService.patchModel(role).
+                        orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Role is not found or invalid properties mapping")));
     }
 }

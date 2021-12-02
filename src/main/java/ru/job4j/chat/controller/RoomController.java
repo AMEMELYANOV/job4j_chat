@@ -7,6 +7,7 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.model.Room;
 import ru.job4j.chat.service.RoomService;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,5 +63,14 @@ public class RoomController {
         room.setId(id);
         this.roomService.delete(room);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/")
+    public ResponseEntity<Room> patch(@RequestBody Room room)
+            throws InvocationTargetException, IllegalAccessException {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(roomService.patchModel(room).
+                        orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Room is not found or invalid properties mapping")));
     }
 }

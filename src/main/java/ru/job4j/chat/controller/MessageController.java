@@ -5,9 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.model.Message;
-import ru.job4j.chat.model.Role;
 import ru.job4j.chat.service.MessageService;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,5 +66,14 @@ public class MessageController {
         message.setId(id);
         this.messageService.delete(message);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/")
+    public ResponseEntity<Message> patch(@RequestBody Message message)
+            throws InvocationTargetException, IllegalAccessException {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(messageService.patchModel(message).
+                        orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Message is not found or invalid properties mapping")));
     }
 }
