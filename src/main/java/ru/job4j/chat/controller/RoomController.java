@@ -2,11 +2,14 @@ package ru.job4j.chat.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.model.Room;
 import ru.job4j.chat.service.RoomService;
+import ru.job4j.chat.validator.Operation;
 
+import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,10 +40,8 @@ public class RoomController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Room> create(@RequestBody Room room) {
-        if (room.getName() == null) {
-            throw new NullPointerException("Name mustn't be empty");
-        }
+    @Validated(Operation.OnCreate.class)
+    public ResponseEntity<Room> create(@Valid @RequestBody Room room) {
         return new ResponseEntity<Room>(
                 this.roomService.save(room),
                 HttpStatus.CREATED
@@ -48,11 +49,8 @@ public class RoomController {
     }
 
     @PutMapping("/")
-    public ResponseEntity<Void> update(@RequestBody Room room) {
-        if (room.getName() == null) {
-            throw new NullPointerException("Name mustn't be empty");
-        }
-
+    @Validated(Operation.OnUpdate.class)
+    public ResponseEntity<Void> update(@Valid @RequestBody Room room) {
         this.roomService.save(room);
         return ResponseEntity.ok().build();
     }

@@ -2,11 +2,14 @@ package ru.job4j.chat.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.model.Role;
 import ru.job4j.chat.service.RoleService;
+import ru.job4j.chat.validator.Operation;
 
+import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,20 +37,16 @@ public class RoleController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Role> create(@RequestBody Role role) {
-        if (role.getName() == null) {
-            throw new NullPointerException("Name mustn't be empty");
-        }
+    @Validated(Operation.OnCreate.class)
+    public ResponseEntity<Role> create(@Valid @RequestBody Role role) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(this.roleService.save(role));
     }
 
     @PutMapping("/")
-    public ResponseEntity<Void> update(@RequestBody Role role) {
-        if (role.getName() == null) {
-            throw new NullPointerException("Name mustn't be empty");
-        }
+    @Validated(Operation.OnUpdate.class)
+    public ResponseEntity<Void> update(@Valid @RequestBody Role role) {
         this.roleService.save(role);
         return ResponseEntity.ok().build();
     }

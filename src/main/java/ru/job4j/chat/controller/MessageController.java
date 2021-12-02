@@ -2,11 +2,14 @@ package ru.job4j.chat.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.model.Message;
 import ru.job4j.chat.service.MessageService;
+import ru.job4j.chat.validator.Operation;
 
+import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,13 +40,8 @@ public class MessageController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Message> create(@RequestBody Message message) {
-        if (message.getContent() == null || message.getPerson() == null
-        || message.getPerson().getId() == 0 || message.getRoom() == null
-        || message.getRoom().getId() == 0) {
-            throw new NullPointerException("Content, Person, Person.id, "
-                    + "Room and Room.id mustn't be empty");
-        }
+    @Validated(Operation.OnCreate.class)
+    public ResponseEntity<Message> create(@Valid @RequestBody Message message) {
         return new ResponseEntity<Message>(
                 this.messageService.save(message),
                 HttpStatus.CREATED
@@ -51,11 +49,8 @@ public class MessageController {
     }
 
     @PutMapping("/")
-    public ResponseEntity<Void> update(@RequestBody Message message) {
-        if (message.getContent() == null || message.getPerson().getId() == 0
-                || message.getRoom().getId() == 0) {
-            throw new NullPointerException("Content, Person ID and Room ID mustn't be empty");
-        }
+    @Validated(Operation.OnUpdate.class)
+    public ResponseEntity<Void> update(@Valid @RequestBody Message message) {
         this.messageService.save(message);
         return ResponseEntity.ok().build();
     }

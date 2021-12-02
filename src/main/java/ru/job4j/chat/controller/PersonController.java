@@ -6,13 +6,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.model.Person;
 import ru.job4j.chat.service.PersonService;
+import ru.job4j.chat.validator.Operation;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -54,19 +57,8 @@ public class PersonController {
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<Person> create(@RequestBody Person person) {
-        var username = person.getUsername();
-        var password = person.getPassword();
-        if (username == null || password == null) {
-            throw new NullPointerException("Username and password mustn't be empty");
-        }
-        if (password.length() < 6) {
-            throw new IllegalArgumentException("Invalid password "
-                    + "password length must be more than 5 characters. ");
-        } else if (username.length() < 3) {
-            throw new IllegalArgumentException("Invalid username. "
-                    + "Username length must be more than 2 characters.");
-        }
+    @Validated(Operation.OnCreate.class)
+    public ResponseEntity<Person> create(@Valid @RequestBody Person person) {
         person.setPassword(encoder.encode(person.getPassword()));
         personService.save(person);
         return new ResponseEntity<Person>(
@@ -76,12 +68,8 @@ public class PersonController {
     }
 
     @PutMapping("/")
-    public ResponseEntity<Void> update(@RequestBody Person person) {
-        var username = person.getUsername();
-        var password = person.getPassword();
-        if (username == null || password == null) {
-            throw new NullPointerException("Username and password mustn't be empty");
-        }
+    @Validated(Operation.OnUpdate.class)
+    public ResponseEntity<Void> update(@Valid @RequestBody Person person) {
         this.personService.save(person);
         return ResponseEntity.ok().build();
     }

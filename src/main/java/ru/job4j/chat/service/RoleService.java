@@ -5,7 +5,6 @@ import ru.job4j.chat.model.Role;
 import ru.job4j.chat.repository.RoleRepository;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -38,33 +37,6 @@ public class RoleService {
 
     public Optional<Role> patchModel(Role role)
             throws InvocationTargetException, IllegalAccessException {
-        var currentOpt = findById(role.getId());
-        if (currentOpt.isEmpty()) {
-            return Optional.empty();
-        }
-        var current = currentOpt.get();
-        var methods = current.getClass().getDeclaredMethods();
-        var namePerMethod = new HashMap<String, Method>();
-        for (var method: methods) {
-            var name = method.getName();
-            if (name.startsWith("get") || name.startsWith("set")) {
-                namePerMethod.put(name, method);
-            }
-        }
-        for (var name : namePerMethod.keySet()) {
-            if (name.startsWith("get")) {
-                var getMethod = namePerMethod.get(name);
-                var setMethod = namePerMethod.get(name.replace("get", "set"));
-                if (setMethod == null) {
-                    return Optional.empty();
-                }
-                var newValue = getMethod.invoke(role);
-                if (newValue != null) {
-                    setMethod.invoke(current, newValue);
-                }
-            }
-        }
-        roleRepository.save(role);
-        return Optional.of(current);
+        return DTOService.patchModel(roleRepository, role);
     }
 }
